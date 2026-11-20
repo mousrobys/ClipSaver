@@ -1,4 +1,4 @@
-# ClipSaver
+﻿# ClipSaver
 
 **Lightweight local clipboard manager for Windows 11.**
 
@@ -8,7 +8,7 @@
 
 ClipSaver automatically saves copied text, links, and images, lets you browse and search your history, pin favorites, and quickly copy items back to the clipboard. It runs quietly in the background and opens instantly with **Ctrl + Shift + V**.
 
-- **Version:** 1.0.0
+- **Version:** 1.0.1
 - **Platform:** Windows 11 (x64)
 - **Technology:** C#, .NET 8, Windows Forms, Win32 API, System.Text.Json
 - **Languages:** Russian and English with automatic detection
@@ -148,6 +148,16 @@ The portable `ClipSaver.exe` can be produced locally from source using the publi
 7. Use the star icon to manage favorites and the trash icon to delete items.
 8. Open **Settings / Настройки** to configure saving, startup, limits, retention, cleanup, theme, and language.
 9. Closing the window minimizes ClipSaver to the tray. Use **Exit / Выход** in the tray menu to quit.
+
+## Troubleshooting
+
+### Ctrl + Shift + V does not open ClipSaver
+
+- Make sure ClipSaver is running — check for the tray icon.
+- If you chose **Exit** in the tray menu, launch ClipSaver again from the Start Menu.
+- Enable **Run at startup** in Settings, or reinstall with the default autostart option.
+- In version **1.0.1+**, ClipSaver also uses a background hotkey watchdog. If another application reserves `Ctrl + Shift + V`, ClipSaver shows a tray notification and still opens by that shortcut.
+- If you use an older version, install the latest `ClipSaverSetup.exe` from Releases.
 
 ## Localization
 

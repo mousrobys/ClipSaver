@@ -14,6 +14,14 @@ internal static class NativeMethods
 
     public const int HOTKEY_ID_SHOW = 1;
 
+    public const int VK_SHIFT = 0x10;
+    public const int VK_CONTROL = 0x11;
+    public const int VK_MENU = 0x12;
+    public const int VK_V = 0x56;
+
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern short GetAsyncKeyState(int vKey);
+
     [DllImport("user32.dll", SetLastError = true)]
     public static extern bool AddClipboardFormatListener(IntPtr hwnd);
 

@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using ClipSaver.Models;
 
 namespace ClipSaver.Services;
@@ -106,8 +106,9 @@ public static class Loc
         ["theme.dark"] = "Тёмная тема",
         ["status.recording"] = "●  Запись активна",
         ["status.paused"] = "●  Запись на паузе",
-        ["version"] = "Версия 1.0.0 · локально",
+        ["version"] = "Версия 1.0.1 · локально",
         ["hotkey.hint"] = "Ctrl + Shift + V — открыть",
+        ["hotkey.conflict"] = "Ctrl + Shift + V занята другой программой. ClipSaver всё равно откроется по этой клавише.",
         ["header.all"] = "Вся история",
         ["header.favorites"] = "Избранное",
         ["header.settings"] = "Настройки",
@@ -172,7 +173,7 @@ public static class Loc
         ["settings.openFolder"] = "Открыть папку",
         ["settings.clear"] = "Очистить историю",
         ["settings.about"] = "О программе",
-        ["about.line1"] = "ClipSaver 1.0.0 — лёгкий менеджер буфера обмена для Windows 11.",
+        ["about.line1"] = "ClipSaver 1.0.1 — лёгкий менеджер буфера обмена для Windows 11.",
         ["about.line2"] = "Работает полностью локально: без сети, аккаунтов и телеметрии.",
         ["about.line3"] = "Горячая клавиша: Ctrl + Shift + V",
         ["dialog.clear.title"] = "Очистка истории",
@@ -197,8 +198,9 @@ public static class Loc
         ["theme.dark"] = "Dark theme",
         ["status.recording"] = "●  Recording",
         ["status.paused"] = "●  Recording paused",
-        ["version"] = "Version 1.0.0 · local",
+        ["version"] = "Version 1.0.1 · local",
         ["hotkey.hint"] = "Ctrl + Shift + V — open",
+        ["hotkey.conflict"] = "Ctrl + Shift + V is used by another app. ClipSaver will still open with it.",
         ["header.all"] = "All history",
         ["header.favorites"] = "Favorites",
         ["header.settings"] = "Settings",
@@ -263,7 +265,7 @@ public static class Loc
         ["settings.openFolder"] = "Open folder",
         ["settings.clear"] = "Clear history",
         ["settings.about"] = "About",
-        ["about.line1"] = "ClipSaver 1.0.0 — a lightweight clipboard manager for Windows 11.",
+        ["about.line1"] = "ClipSaver 1.0.1 — a lightweight clipboard manager for Windows 11.",
         ["about.line2"] = "Works fully offline: no network, accounts, or telemetry.",
         ["about.line3"] = "Hotkey: Ctrl + Shift + V",
         ["dialog.clear.title"] = "Clear history",

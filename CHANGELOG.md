@@ -2,6 +2,22 @@
 
 All notable changes to ClipSaver are documented here.
 
+## [1.0.1] — 2026-11-20
+
+### Fixed
+
+- **Ctrl + Shift + V hotkey reliability.** ClipSaver now uses a watchdog fallback in addition to the system hotkey, so the window opens even if another application has reserved the shortcut or global hotkey registration fails.
+- The tray notification now informs the user if the shortcut is occupied by another program.
+- Clipboard monitoring and the hotkey remain active after minimizing to the tray.
+
+## [1.0.1] — 20.11.2026 (русская версия)
+
+### Исправлено
+
+- **Надёжность горячей клавиши Ctrl + Shift + V.** Добавлен резервный контроль нажатия: окно открывается даже если комбинацию заняла другая программа или системная регистрация не удалась.
+- Если комбинация занята другой программой, появляется уведомление в трее.
+- Мониторинг буфера и горячая клавиша продолжают работать после сворачивания в трей.
+
 ## [1.0.0] — 2026-11-20
 
 ### Added

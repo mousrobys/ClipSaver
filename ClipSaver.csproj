@@ -7,9 +7,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>ClipSaver</AssemblyName>
     <RootNamespace>ClipSaver</RootNamespace>
-    <Version>1.0.0</Version>
-    <FileVersion>1.0.0.0</FileVersion>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <Version>1.0.1</Version>
+    <FileVersion>1.0.1.0</FileVersion>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
     <Product>ClipSaver</Product>
     <Description>Lightweight local clipboard manager for Windows 11.</Description>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>

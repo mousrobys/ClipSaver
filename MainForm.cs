@@ -92,6 +92,11 @@ public class MainForm : Form, IMessageFilter
     private readonly System.Windows.Forms.Timer _refreshTimer = new() { Interval = 140 };
     private readonly System.Windows.Forms.Timer _toastTimer = new() { Interval = 1800 };
     private readonly System.Windows.Forms.Timer _clipboardSuppressTimer = new() { Interval = 550 };
+    private readonly System.Windows.Forms.Timer _hotkeyGuardTimer = new() { Interval = 40 };
+
+    private bool _hotkeyRegistered;
+    private bool _hotkeyComboDown;
+    private DateTime _lastHotkeyShow = DateTime.MinValue;
 
     public MainForm()
     {
@@ -731,10 +736,27 @@ public class MainForm : Form, IMessageFilter
         try { NativeMethods.AddClipboardFormatListener(Handle); } catch { }
         try
         {
-            NativeMethods.RegisterHotKey(Handle, NativeMethods.HOTKEY_ID_SHOW,
+            _hotkeyRegistered = NativeMethods.RegisterHotKey(Handle, NativeMethods.HOTKEY_ID_SHOW,
                 NativeMethods.MOD_CONTROL | NativeMethods.MOD_SHIFT, (uint)Keys.V);
         }
-        catch { }
+        catch
+        {
+            _hotkeyRegistered = false;
+        }
+
+        // Watchdog fallback: some apps reserve Ctrl+Shift+V globally, and
+        // RegisterHotKey can silently fail. Polling guarantees the window opens.
+        _hotkeyGuardTimer.Tick += (_, _) => CheckHotkeyGuard();
+        _hotkeyGuardTimer.Start();
+
+        if (!_hotkeyRegistered)
+        {
+            try
+            {
+                _trayIcon.ShowBalloonTip(3500, "ClipSaver", Loc.T("hotkey.conflict"), ToolTipIcon.Warning);
+            }
+            catch { }
+        }
 
         LoadSettingsUi();
         ApplyTheme();
@@ -765,7 +787,10 @@ public class MainForm : Form, IMessageFilter
 
         SaveAll();
         try { NativeMethods.RemoveClipboardFormatListener(Handle); } catch { }
-        try { NativeMethods.UnregisterHotKey(Handle, NativeMethods.HOTKEY_ID_SHOW); } catch { }
+        if (_hotkeyRegistered)
+        {
+            try { NativeMethods.UnregisterHotKey(Handle, NativeMethods.HOTKEY_ID_SHOW); } catch { }
+        }
         Application.RemoveMessageFilter(this);
         _trayIcon.Visible = false;
         _trayIcon.Dispose();
@@ -774,6 +799,7 @@ public class MainForm : Form, IMessageFilter
         _refreshTimer.Stop();
         _toastTimer.Stop();
         _clipboardSuppressTimer.Stop();
+        _hotkeyGuardTimer.Stop();
         _toolTip.Dispose();
     }
 
@@ -1490,7 +1516,7 @@ public class MainForm : Form, IMessageFilter
         }
         else if (m.Msg == NativeMethods.WM_HOTKEY && m.WParam.ToInt32() == NativeMethods.HOTKEY_ID_SHOW)
         {
-            try { BeginInvoke(new Action(ShowMainWindow)); } catch { }
+            ShowFromHotkey();
         }
         base.WndProc(ref m);
     }
@@ -1611,6 +1637,45 @@ public class MainForm : Form, IMessageFilter
         catch { }
     }
 
+    private void CheckHotkeyGuard()
+    {
+        if (_isExitRequested) return;
+
+        bool ctrl = (NativeMethods.GetAsyncKeyState(NativeMethods.VK_CONTROL) & 0x8000) != 0;
+        bool shift = (NativeMethods.GetAsyncKeyState(NativeMethods.VK_SHIFT) & 0x8000) != 0;
+        bool alt = (NativeMethods.GetAsyncKeyState(NativeMethods.VK_MENU) & 0x8000) != 0;
+        bool v = (NativeMethods.GetAsyncKeyState(NativeMethods.VK_V) & 0x8000) != 0;
+        bool down = ctrl && shift && v && !alt;
+
+        if (down && !_hotkeyComboDown)
+        {
+            _hotkeyComboDown = true;
+            ShowFromHotkey();
+        }
+        else if (!down)
+        {
+            _hotkeyComboDown = false;
+        }
+    }
+
+    private void ShowFromHotkey()
+    {
+        if (_isExitRequested) return;
+
+        var now = DateTime.UtcNow;
+        if ((now - _lastHotkeyShow).TotalMilliseconds < 350) return;
+        _lastHotkeyShow = now;
+
+        try
+        {
+            BeginInvoke(new Action(ShowMainWindow));
+        }
+        catch
+        {
+            ShowMainWindow();
+        }
+    }
+
     protected override void OnHandleCreated(EventArgs e)
     {
         base.OnHandleCreated(e);
@@ -1629,6 +1694,7 @@ public class MainForm : Form, IMessageFilter
             _refreshTimer?.Dispose();
             _toastTimer?.Dispose();
             _clipboardSuppressTimer?.Dispose();
+            _hotkeyGuardTimer?.Dispose();
             _toolTip?.Dispose();
         }
         base.Dispose(disposing);

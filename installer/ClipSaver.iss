@@ -1,5 +1,5 @@
 ﻿#define MyAppName "ClipSaver"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.1"
 #define MyAppPublisher "ClipSaver"
 #define MyAppExeName "ClipSaver.exe"
 
@@ -32,7 +32,7 @@ RestartApplications=no
 UsePreviousAppDir=yes
 SetupLogging=yes
 LanguageDetectionMethod=uilanguage
-VersionInfoVersion=1.0.0.0
+VersionInfoVersion=1.0.1.0
 VersionInfoDescription={#MyAppName} Setup
 VersionInfoCompany={#MyAppPublisher}
 VersionInfoCopyright=MIT License
