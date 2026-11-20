@@ -21,9 +21,8 @@ Download the latest build from **[GitHub Releases](https://github.com/mousrobys/
 | File | Description |
 | --- | --- |
 | **`ClipSaverSetup.exe`** | Recommended setup installer. Per-user installation, no administrator rights required. |
-| **`ClipSaver.exe`** | Portable self-contained build. No .NET Runtime installation required. |
 
-The GitHub repository contains the source code. The `Программа` folder with compiled binaries is generated locally and is intentionally excluded from Git because of its size; releases contain both executables.
+The GitHub repository contains the source code. The `Программа` folder with compiled binaries is generated locally and is intentionally excluded from Git because of its size; releases contain the setup installer.
 
 ## Requirements
 
@@ -133,7 +132,7 @@ The GitHub repository contains the source code. The `Программа` folder 
 5. The installer creates Start Menu and uninstall shortcuts and registers ClipSaver in Windows Settings → Apps.
 
 ### Portable version
-Run **`ClipSaver.exe`** directly. It is a self-contained Windows x64 build and does not require .NET Runtime.
+The portable `ClipSaver.exe` can be produced locally from source using the publish command below. Prebuilt portable binaries are not attached to releases.
 
 ## Usage
 
