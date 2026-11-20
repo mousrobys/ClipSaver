@@ -2,6 +2,32 @@
 
 All notable changes to ClipSaver are documented here.
 
+## [1.0.2] — 2026-11-20
+
+### Added
+
+- Redesigned Windows 11-style tray menu with a rounded panel, app header, recording status, hotkey hint, and icons for every action.
+- Branded ClipSaver icon in the Windows notification area / hidden icons panel.
+- Left-clicking the tray icon opens ClipSaver;
+- Context menus for history items use the same Windows 11 styling and icons.
+
+### Fixed
+
+- Hotkey watchdog from 1.0.1 is included: `Ctrl + Shift + V` opens ClipSaver even if another app has reserved the shortcut.
+
+## [1.0.2] — 20.11.2026 (русская версия)
+
+### Добавлено
+
+- Новое меню в трее в стиле Windows 11: скруглённая панель, шапка приложения, статус записи, подсказка горячей клавиши и иконки для всех действий.
+- Фирменная иконка ClipSaver в области уведомлений Windows / панели скрытых значков.
+- Левый клик по иконке в трее открывает ClipSaver.
+- Контекстные меню записей оформлены в том же стиле Windows 11.
+
+### Исправлено
+
+- Включён резервный контроль хоткея из 1.0.1: `Ctrl + Shift + V` открывает ClipSaver, даже если комбинацию заняла другая программа.
+
 ## [1.0.1] — 2026-11-20
 
 ### Fixed

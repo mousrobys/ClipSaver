@@ -14,6 +14,7 @@ public class MainForm : Form, IMessageFilter
     private NotifyIcon _trayIcon = null!;
     private ContextMenuStrip _trayMenu = null!;
     private ToolStripMenuItem _trayPauseItem = null!;
+    private Label? _trayHeaderStatus;
     private readonly ToolTip _toolTip = new();
 
     // Sidebar
@@ -113,7 +114,16 @@ public class MainForm : Form, IMessageFilter
         KeyPreview = true;
         DoubleBuffered = true;
 
-        try { Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath); } catch { }
+        try
+        {
+            using var iconStream = typeof(MainForm).Assembly.GetManifestResourceStream("ClipSaver.app.ico");
+            if (iconStream is not null) Icon = new System.Drawing.Icon(iconStream);
+        }
+        catch { }
+        if (Icon is null)
+        {
+            try { Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath); } catch { }
+        }
 
         BuildUi();
         BuildTray();
@@ -692,41 +702,200 @@ public class MainForm : Form, IMessageFilter
 
     private void BuildTray()
     {
-        _trayPauseItem = new ToolStripMenuItem(Loc.T("tray.pause"), null, (_, _) => TogglePause());
-
-        _trayMenu = new ContextMenuStrip
-        {
-            ShowImageMargin = false,
-            Font = new Font("Segoe UI", 9.75F)
-        };
-        _trayMenu.Items.Add(Loc.T("tray.open"), null, (_, _) => ShowMainWindow());
-        _trayMenu.Items.Add(_trayPauseItem);
-        _trayMenu.Items.Add(Loc.T("tray.settings"), null, (_, _) => { ShowMainWindow(); SwitchView(ViewMode.Settings); });
-        _trayMenu.Items.Add(new ToolStripSeparator());
-        _trayMenu.Items.Add(Loc.T("tray.exit"), null, (_, _) => ExitApp());
-
         _trayIcon = new NotifyIcon
         {
             Text = "ClipSaver",
             Icon = Icon ?? SystemIcons.Application,
-            Visible = true,
-            ContextMenuStrip = _trayMenu
+            Visible = true
+        };
+        _trayIcon.MouseClick += (_, e) =>
+        {
+            if (e.Button == MouseButtons.Left) ShowMainWindow();
         };
         _trayIcon.DoubleClick += (_, _) => ShowMainWindow();
 
-        StyleMenu(_trayMenu);
+        BuildTrayMenu();
+    }
+
+    private void BuildTrayMenu()
+    {
+        var oldMenu = _trayMenu;
+
+        var menu = new ContextMenuStrip
+        {
+            Font = new Font("Segoe UI", 9.75F),
+            ShowImageMargin = true,
+            ImageScalingSize = new Size(18, 18),
+            MinimumSize = new Size(292, 0),
+            Padding = new Padding(6),
+            DropShadowEnabled = true
+        };
+
+        var header = CreateTrayHeader();
+        var headerHost = new ToolStripControlHost(header)
+        {
+            AutoSize = false,
+            Width = 280,
+            Height = 66,
+            Margin = Padding.Empty,
+            Padding = Padding.Empty
+        };
+        menu.Items.Add(headerHost);
+        menu.Items.Add(new ToolStripSeparator());
+
+        var openItem = MakeMenuItem(Loc.T("tray.open"), "\uE8A7", ShowMainWindow);
+        _trayPauseItem = MakeMenuItem(Loc.T("tray.pause"), "\uE769", TogglePause);
+        var settingsItem = MakeMenuItem(Loc.T("tray.settings"), "\uE713", () =>
+        {
+            ShowMainWindow();
+            SwitchView(ViewMode.Settings);
+        });
+        var exitItem = MakeMenuItem(Loc.T("tray.exit"), "\uE7E8", ExitApp);
+
+        menu.Items.Add(openItem);
+        menu.Items.Add(_trayPauseItem);
+        menu.Items.Add(settingsItem);
+        menu.Items.Add(new ToolStripSeparator());
+        menu.Items.Add(exitItem);
+
+        ApplyMenuStyle(menu);
+
+        _trayMenu = menu;
+        if (_trayIcon is not null)
+            _trayIcon.ContextMenuStrip = menu;
+
+        oldMenu?.Dispose();
+        UpdateRecordingUi();
+    }
+
+    private Control CreateTrayHeader()
+    {
+        var panel = new Panel
+        {
+            Width = 280,
+            Height = 66,
+            BackColor = _theme.Card,
+            Cursor = Cursors.Hand
+        };
+
+        var iconBox = new PictureBox
+        {
+            Size = new Size(30, 30),
+            Location = new Point(12, 10),
+            SizeMode = PictureBoxSizeMode.Zoom,
+            BackColor = Color.Transparent,
+            Image = AppIcons.FromIcon(Icon ?? SystemIcons.Application, 30)
+        };
+
+        var title = new Label
+        {
+            Text = "ClipSaver",
+            Font = new Font("Segoe UI Semibold", 10.5F),
+            AutoSize = true,
+            Location = new Point(52, 7),
+            ForeColor = _theme.Text,
+            BackColor = Color.Transparent
+        };
+
+        _trayHeaderStatus = new Label
+        {
+            Font = new Font("Segoe UI", 8.5F),
+            AutoSize = true,
+            Location = new Point(52, 27),
+            ForeColor = _theme.TextMuted,
+            BackColor = Color.Transparent
+        };
+
+        var hint = new Label
+        {
+            Text = Loc.T("hotkey.hint"),
+            Font = new Font("Segoe UI", 7.75F),
+            AutoSize = true,
+            Location = new Point(52, 45),
+            ForeColor = _theme.TextFaint,
+            BackColor = Color.Transparent
+        };
+
+        void openFromHeader(object? sender, EventArgs e)
+        {
+            _trayMenu?.Close();
+            ShowMainWindow();
+        }
+
+        panel.Click += openFromHeader;
+        iconBox.Click += openFromHeader;
+        title.Click += openFromHeader;
+        _trayHeaderStatus.Click += openFromHeader;
+        hint.Click += openFromHeader;
+
+        panel.Disposed += (_, _) =>
+        {
+            var image = iconBox.Image;
+            iconBox.Image = null;
+            image?.Dispose();
+        };
+
+        panel.Controls.Add(iconBox);
+        panel.Controls.Add(title);
+        panel.Controls.Add(_trayHeaderStatus);
+        panel.Controls.Add(hint);
+        return panel;
+    }
+
+    private ToolStripMenuItem MakeMenuItem(string text, string glyph, Action action)
+    {
+        var item = new ToolStripMenuItem(text)
+        {
+            Image = AppIcons.Glyph(glyph, _theme.Accent, 18),
+            ImageScaling = ToolStripItemImageScaling.None,
+            Padding = new Padding(4, 6, 8, 6)
+        };
+        item.Click += (_, _) => action();
+        item.Disposed += (_, _) =>
+        {
+            var image = item.Image;
+            item.Image = null;
+            image?.Dispose();
+        };
+        return item;
     }
 
     private void StyleMenu(ContextMenuStrip menu)
     {
+        ApplyMenuStyle(menu);
+    }
+
+    private void ApplyMenuStyle(ContextMenuStrip menu)
+    {
         menu.BackColor = _theme.Card;
         menu.ForeColor = _theme.Text;
-        menu.Renderer = new ToolStripProfessionalRenderer(new AppColorTable(_theme)) { RoundedEdges = true };
+        menu.Renderer = new Win11MenuRenderer(_theme);
+        menu.ShowImageMargin = true;
+        menu.ImageScalingSize = new Size(18, 18);
+        menu.DropShadowEnabled = true;
+
         foreach (ToolStripItem item in menu.Items)
         {
             item.BackColor = _theme.Card;
             item.ForeColor = _theme.Text;
+            if (item is ToolStripMenuItem menuItem)
+            {
+                menuItem.ImageScaling = ToolStripItemImageScaling.None;
+                menuItem.Padding = new Padding(4, 6, 8, 6);
+            }
         }
+
+        menu.Opened += (_, _) => ApplyMenuRegion(menu);
+        menu.Resize += (_, _) => ApplyMenuRegion(menu);
+    }
+
+    private static void ApplyMenuRegion(ContextMenuStrip menu)
+    {
+        if (menu.Width <= 0 || menu.Height <= 0) return;
+        using var path = Draw.Rounded(new Rectangle(0, 0, menu.Width, menu.Height), 10);
+        var old = menu.Region;
+        menu.Region = new Region(path);
+        old?.Dispose();
     }
 
     // ===================== Lifecycle =====================
@@ -1144,20 +1313,21 @@ public class MainForm : Form, IMessageFilter
                 ShowToast(Loc.T("toast.deleted"));
             });
 
-        var menu = new ContextMenuStrip { ShowImageMargin = false, Font = new Font("Segoe UI", 9.5F) };
-        menu.Items.Add(Loc.T("item.copy"), null, (_, _) => CopyItemToClipboard(item));
-        menu.Items.Add(item.IsFavorite ? Loc.T("item.unpin") : Loc.T("item.pin"), null, (_, _) =>
+        var menu = new ContextMenuStrip();
+        menu.Items.Add(MakeMenuItem(Loc.T("item.copy"), "\uE8C8", () => CopyItemToClipboard(item)));
+        menu.Items.Add(MakeMenuItem(item.IsFavorite ? Loc.T("item.unpin") : Loc.T("item.pin"),
+            item.IsFavorite ? "\uE735" : "\uE734", () =>
         {
             _store.ToggleFavorite(item.Id);
             RefreshList();
-        });
+        }));
         menu.Items.Add(new ToolStripSeparator());
-        menu.Items.Add(Loc.T("item.delete"), null, (_, _) =>
+        menu.Items.Add(MakeMenuItem(Loc.T("item.delete"), "\uE74D", () =>
         {
             _store.DeleteItem(item.Id);
             RefreshList();
             ShowToast(Loc.T("toast.deleted"));
-        });
+        }));
         StyleMenu(menu);
         card.ContextMenuStrip = menu;
         card.Disposed += (_, _) => menu.Dispose();
@@ -1281,6 +1451,14 @@ public class MainForm : Form, IMessageFilter
         {
             _trayPauseItem.Text = paused ? Loc.T("tray.resume") : Loc.T("tray.pause");
             _trayPauseItem.Checked = paused;
+            var oldImage = _trayPauseItem.Image;
+            _trayPauseItem.Image = AppIcons.Glyph(paused ? "\uE768" : "\uE769", _theme.Accent, 18);
+            oldImage?.Dispose();
+        }
+        if (_trayHeaderStatus is not null)
+        {
+            _trayHeaderStatus.Text = paused ? Loc.T("status.paused") : Loc.T("status.recording");
+            _trayHeaderStatus.ForeColor = paused ? _theme.Danger : _theme.Success;
         }
         if (_trayIcon is not null)
             _trayIcon.Text = paused ? Loc.T("tray.paused") : Loc.T("tray.active");
@@ -1344,8 +1522,8 @@ public class MainForm : Form, IMessageFilter
 
     private void ApplyTrayTheme()
     {
-        if (_trayMenu is null) return;
-        StyleMenu(_trayMenu);
+        if (_trayIcon is null) return;
+        BuildTrayMenu();
     }
 
     private void ApplyTheme()
