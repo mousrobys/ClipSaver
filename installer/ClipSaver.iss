@@ -60,7 +60,11 @@ Name: "startup"; Description: "{cm:StartupTask}"; GroupDescription: "{cm:Additio
 Source: "..\Программа\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\DESCRIPTION_RU.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\CHANGELOG.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\CONTRIBUTING.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\SECURITY.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\screenshots\*.png"; DestDir: "{app}\screenshots"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\ClipSaver"; Filename: "{app}\{#MyAppExeName}"
