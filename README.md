@@ -3,7 +3,6 @@
 **Lightweight local clipboard manager for Windows 11.**
 
 [![Latest release](https://img.shields.io/github/v/release/mousrobys/ClipSaver?sort=semver)](https://github.com/mousrobys/ClipSaver/releases/latest)
-[![Build](https://github.com/mousrobys/ClipSaver/actions/workflows/build-release.yml/badge.svg)](https://github.com/mousrobys/ClipSaver/actions/workflows/build-release.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%2011%20x64-0078D4)](#requirements)
 
